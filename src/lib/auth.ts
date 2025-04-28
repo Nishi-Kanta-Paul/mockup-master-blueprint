@@ -9,11 +9,22 @@ interface AuthState {
   loading: boolean;
 }
 
+interface LoginAttempt {
+  email: string;
+  attempts: number;
+  lockedUntil: Date | null;
+}
+
 let authState: AuthState = {
   isAuthenticated: false,
   user: null,
   loading: false
 };
+
+// Track login attempts for account lockout
+const loginAttempts: LoginAttempt[] = [];
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MINUTES = 15;
 
 export const getAuthState = (): AuthState => {
   // In a real app, we would check for a token in localStorage or cookies
@@ -25,11 +36,39 @@ export const login = (email: string, password: string): Promise<User> => {
   return new Promise((resolve, reject) => {
     authState.loading = true;
     
+    // Check if account is locked
+    const attemptRecord = loginAttempts.find(a => a.email === email);
+    if (attemptRecord && attemptRecord.lockedUntil) {
+      if (new Date() < attemptRecord.lockedUntil) {
+        authState.loading = false;
+        const minutesLeft = Math.ceil((attemptRecord.lockedUntil.getTime() - new Date().getTime()) / (1000 * 60));
+        
+        toast({
+          title: "Account temporarily locked",
+          description: `Too many failed attempts. Try again in ${minutesLeft} minutes.`,
+          variant: "destructive"
+        });
+        
+        reject(new Error(`Account locked. Try again in ${minutesLeft} minutes`));
+        return;
+      } else {
+        // Reset lockout if time has passed
+        attemptRecord.lockedUntil = null;
+        attemptRecord.attempts = 0;
+      }
+    }
+    
     // Simulate API call
     setTimeout(() => {
       const user = users.find(u => u.email === email);
       
       if (user && password === "password") { // For demo purposes, accept "password" as valid
+        // Reset login attempts on successful login
+        const index = loginAttempts.findIndex(a => a.email === email);
+        if (index !== -1) {
+          loginAttempts[index].attempts = 0;
+        }
+        
         authState = {
           isAuthenticated: true,
           user,
@@ -50,11 +89,40 @@ export const login = (email: string, password: string): Promise<User> => {
           variant: "destructive"
         });
         
+        // Track failed attempts and implement lockout
+        const existingAttempt = loginAttempts.find(a => a.email === email);
+        if (existingAttempt) {
+          existingAttempt.attempts += 1;
+          
+          // Lock account after max attempts
+          if (existingAttempt.attempts >= MAX_LOGIN_ATTEMPTS) {
+            const lockoutTime = new Date();
+            lockoutTime.setMinutes(lockoutTime.getMinutes() + LOCKOUT_DURATION_MINUTES);
+            existingAttempt.lockedUntil = lockoutTime;
+            
+            toast({
+              title: "Account temporarily locked",
+              description: `Too many failed attempts. Try again in ${LOCKOUT_DURATION_MINUTES} minutes.`,
+              variant: "destructive"
+            });
+          }
+        } else {
+          // First failed attempt
+          loginAttempts.push({
+            email,
+            attempts: 1,
+            lockedUntil: null
+          });
+        }
+        
         reject(new Error("Invalid email or password"));
       }
     }, 500);
   });
 };
+
+// Flag to track if email verification is required
+const EMAIL_VERIFICATION_REQUIRED = true;
 
 export const register = (name: string, email: string, password: string, role: UserRole): Promise<User> => {
   return new Promise((resolve, reject) => {
@@ -81,24 +149,56 @@ export const register = (name: string, email: string, password: string, role: Us
         id: `user_${users.length + 1}`,
         name,
         email,
-        role
+        role,
+        verified: !EMAIL_VERIFICATION_REQUIRED // Mark as not verified if verification is required
       };
       
       // In a real app, we would send this to the server
       users.push(newUser);
       
-      authState = {
-        isAuthenticated: true,
-        user: newUser,
-        loading: false
-      };
-      
+      if (EMAIL_VERIFICATION_REQUIRED) {
+        // In a real app, we would send a verification email here
+        console.log(`Verification email sent to ${email}`);
+        
+        authState.loading = false;
+        
+        toast({
+          title: "Registration successful",
+          description: "Please check your email to verify your account before logging in.",
+        });
+        
+        // Don't auto-login if verification is required
+        resolve(newUser);
+      } else {
+        authState = {
+          isAuthenticated: true,
+          user: newUser,
+          loading: false
+        };
+        
+        toast({
+          title: "Registration successful",
+          description: "Your account has been created",
+        });
+        
+        resolve(newUser);
+      }
+    }, 500);
+  });
+};
+
+// New function to verify email
+export const verifyEmail = (verificationToken: string): Promise<boolean> => {
+  return new Promise((resolve) => {
+    // In a real app, we would validate the token with the server
+    setTimeout(() => {
+      // For demo purposes, always succeed
       toast({
-        title: "Registration successful",
-        description: "Your account has been created",
+        title: "Email verified",
+        description: "Your email has been verified successfully. You can now log in.",
       });
       
-      resolve(newUser);
+      resolve(true);
     }, 500);
   });
 };

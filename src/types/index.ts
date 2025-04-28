@@ -6,6 +6,7 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
+  verified?: boolean;
 }
 
 export interface Product {
@@ -52,4 +53,24 @@ export interface ContractPrice {
   productId: string;
   price: number;
   effectiveDate: string;
+  expirationDate?: string; // New field for contract price expiration
+}
+
+// New interfaces for enhanced corporate pricing management
+export interface CorporateClient {
+  id: string;
+  name: string;
+  contactEmail: string;
+  contactName: string;
+  status: "active" | "inactive";
+}
+
+export interface PriceHistory {
+  id: string;
+  contractId: string;
+  productId: string;
+  price: number;
+  effectiveDate: string;
+  expirationDate?: string;
+  createdAt: string;
 }

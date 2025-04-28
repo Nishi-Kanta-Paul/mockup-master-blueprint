@@ -10,6 +10,7 @@ import { register } from "@/lib/auth";
 import { Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { UserRole } from "@/types";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export function Register() {
   const [name, setName] = useState("");
@@ -18,6 +19,7 @@ export function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState<UserRole>("individual");
   const [loading, setLoading] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,13 +47,39 @@ export function Register() {
     
     try {
       await register(name, email, password, role);
-      navigate("/dashboard");
+      setVerificationSent(true);
+      // Don't navigate immediately - wait for verification
     } catch (error) {
       console.error("Registration error:", error);
     } finally {
       setLoading(false);
     }
   };
+
+  if (verificationSent) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-subscription-background px-4">
+        <div className="w-full max-w-md">
+          <Card>
+            <CardHeader className="text-center">
+              <CardTitle>Verification Email Sent</CardTitle>
+              <CardDescription>
+                We've sent a verification email to {email}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center justify-center py-8">
+              <p className="text-gray-600 text-center mb-6">
+                Please check your inbox and click on the verification link to complete your registration.
+              </p>
+              <Button onClick={() => navigate("/login")}>
+                Back to Login
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-subscription-background px-4 py-8">
@@ -98,6 +126,9 @@ export function Register() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
+                <p className="text-xs text-gray-500">
+                  Password must be at least 8 characters and include numbers and special characters.
+                </p>
               </div>
               
               <div className="space-y-2">
@@ -125,6 +156,12 @@ export function Register() {
                   </SelectContent>
                 </Select>
               </div>
+              
+              <Alert>
+                <AlertDescription>
+                  After registration, you'll need to verify your email address before you can log in.
+                </AlertDescription>
+              </Alert>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
               <Button type="submit" className="w-full" disabled={loading}>

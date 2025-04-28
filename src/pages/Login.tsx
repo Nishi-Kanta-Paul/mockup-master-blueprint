@@ -8,11 +8,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { login } from "@/lib/auth";
 import { Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [verificationNeeded, setVerificationNeeded] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,8 +34,13 @@ export function Login() {
     try {
       await login(email, password);
       navigate("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
+      
+      // Check if this is a verification error
+      if (error.message?.includes("not verified")) {
+        setVerificationNeeded(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -54,6 +61,14 @@ export function Login() {
           </CardHeader>
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
+              {verificationNeeded && (
+                <Alert variant="destructive">
+                  <AlertDescription>
+                    Your email address has not been verified. Please check your email and follow the verification link before logging in.
+                  </AlertDescription>
+                </Alert>
+              )}
+              
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input

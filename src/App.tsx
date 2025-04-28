@@ -10,6 +10,7 @@ import AuthGuard from "./components/AuthGuard";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import VerifyEmail from "./pages/VerifyEmail";
 import Dashboard from "./pages/Dashboard";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
@@ -49,6 +50,12 @@ const App = () => (
               <AuthGuard requireAuth={false}>
                 <Register />
               </AuthGuard>
+            } 
+          />
+          <Route 
+            path="/verify-email" 
+            element={
+              <VerifyEmail />
             } 
           />
           
