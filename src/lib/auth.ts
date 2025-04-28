@@ -1,4 +1,3 @@
-
 import { User, UserRole } from "@/types";
 import { users } from "@/data/mockData";
 import { toast } from "@/components/ui/use-toast";
@@ -25,6 +24,15 @@ let authState: AuthState = {
 const loginAttempts: LoginAttempt[] = [];
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MINUTES = 15;
+
+// Add dummy user
+users.push({
+  id: "user_dummy",
+  name: "Test User",
+  email: "n72@gmail.com",
+  role: "individual",
+  verified: true
+});
 
 export const getAuthState = (): AuthState => {
   // In a real app, we would check for a token in localStorage or cookies
@@ -62,7 +70,7 @@ export const login = (email: string, password: string): Promise<User> => {
     setTimeout(() => {
       const user = users.find(u => u.email === email);
       
-      if (user && password === "password") { // For demo purposes, accept "password" as valid
+      if (user && password === "12345678N") { // For demo purposes, accept "password" as valid
         // Reset login attempts on successful login
         const index = loginAttempts.findIndex(a => a.email === email);
         if (index !== -1) {
@@ -121,9 +129,6 @@ export const login = (email: string, password: string): Promise<User> => {
   });
 };
 
-// Flag to track if email verification is required
-const EMAIL_VERIFICATION_REQUIRED = true;
-
 export const register = (name: string, email: string, password: string, role: UserRole): Promise<User> => {
   return new Promise((resolve, reject) => {
     authState.loading = true;
@@ -150,39 +155,25 @@ export const register = (name: string, email: string, password: string, role: Us
         name,
         email,
         role,
-        verified: !EMAIL_VERIFICATION_REQUIRED // Mark as not verified if verification is required
+        verified: true // Always verified now
       };
       
       // In a real app, we would send this to the server
       users.push(newUser);
       
-      if (EMAIL_VERIFICATION_REQUIRED) {
-        // In a real app, we would send a verification email here
-        console.log(`Verification email sent to ${email}`);
-        
-        authState.loading = false;
-        
-        toast({
-          title: "Registration successful",
-          description: "Please check your email to verify your account before logging in.",
-        });
-        
-        // Don't auto-login if verification is required
-        resolve(newUser);
-      } else {
-        authState = {
-          isAuthenticated: true,
-          user: newUser,
-          loading: false
-        };
-        
-        toast({
-          title: "Registration successful",
-          description: "Your account has been created",
-        });
-        
-        resolve(newUser);
-      }
+      // Auto-login after registration
+      authState = {
+        isAuthenticated: true,
+        user: newUser,
+        loading: false
+      };
+      
+      toast({
+        title: "Registration successful",
+        description: "Your account has been created",
+      });
+      
+      resolve(newUser);
     }, 500);
   });
 };
