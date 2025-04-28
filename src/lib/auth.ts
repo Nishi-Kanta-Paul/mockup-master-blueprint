@@ -25,12 +25,20 @@ const loginAttempts: LoginAttempt[] = [];
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MINUTES = 15;
 
-// Add dummy user
+// Add dummy users
 users.push({
   id: "user_dummy",
   name: "Test User",
   email: "n72@gmail.com",
   role: "individual",
+  verified: true
+});
+
+users.push({
+  id: "admin_dummy",
+  name: "Admin User",
+  email: "admin@gmail.com",
+  role: "admin",
   verified: true
 });
 
