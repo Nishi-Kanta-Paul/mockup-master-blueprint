@@ -1,4 +1,3 @@
-
 import { User, UserRole } from "@/types";
 import { users } from "@/data/mockData";
 import { toast } from "@/components/ui/use-toast";
@@ -139,4 +138,35 @@ export const logout = (): void => {
 export const checkIsAdmin = (): boolean => {
   const { user } = getAuthState();
   return user?.role === "admin";
+};
+
+// Add the missing verifyEmail function
+export const verifyEmail = (token: string): Promise<boolean> => {
+  return new Promise((resolve, reject) => {
+    // Simulate API call
+    setTimeout(() => {
+      try {
+        // In a real app, we would validate the token and update the user record
+        // For this demo, we'll simply simulate a successful verification if the token exists
+        if (token && token.length > 0) {
+          toast({
+            title: "Email verified",
+            description: "Your email has been verified successfully",
+          });
+          
+          resolve(true);
+        } else {
+          toast({
+            title: "Verification failed",
+            description: "Invalid verification token",
+            variant: "destructive"
+          });
+          
+          reject(new Error("Invalid verification token"));
+        }
+      } catch (error) {
+        reject(error);
+      }
+    }, 500);
+  });
 };
