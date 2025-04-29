@@ -1,25 +1,9 @@
+
 import { User, UserRole } from "@/types";
 import { users } from "@/data/mockData";
 import { toast } from "@/components/ui/use-toast";
 
 const LOCAL_STORAGE_AUTH_KEY = "subscribepro_auth";
-
-// Add dummy users
-users.push({
-  id: "user_dummy",
-  name: "Test User",
-  email: "n72@gmail.com",
-  role: "individual",
-  verified: true
-});
-
-users.push({
-  id: "admin_dummy",
-  name: "Admin User",
-  email: "admin@gmail.com",
-  role: "admin",
-  verified: true
-});
 
 export const getAuthState = () => {
   // Get auth state from localStorage
@@ -105,19 +89,9 @@ export const register = (name: string, email: string, password: string, role: Us
       
       users.push(newUser);
       
-      // Auto-login after registration
-      const authState = {
-        isAuthenticated: true,
-        user: newUser,
-        loading: false
-      };
-      
-      // Save to localStorage
-      localStorage.setItem(LOCAL_STORAGE_AUTH_KEY, JSON.stringify(authState));
-      
       toast({
         title: "Registration successful",
-        description: "Your account has been created",
+        description: "Your account has been created. Please login with your credentials.",
       });
       
       resolve(newUser);

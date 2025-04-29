@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -45,8 +44,8 @@ export function Register() {
     
     try {
       await register(name, email, password, role);
-      // After successful registration, navigate to dashboard
-      navigate("/dashboard");
+      // After successful registration, navigate to login page instead of dashboard
+      navigate("/login");
     } catch (error: any) {
       console.error("Registration error:", error);
     } finally {
