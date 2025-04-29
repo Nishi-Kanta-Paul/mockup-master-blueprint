@@ -53,8 +53,8 @@ export const login = (email: string, password: string): Promise<User> => {
     setTimeout(() => {
       const user = users.find(u => u.email === email);
       
-      // For demo purposes, simple password check (in real app, would use hashed passwords)
-      if (user && password === "12345678N") {
+      // Check if user exists and password matches (passwords would be hashed in a real app)
+      if (user && user.password === password) {
         const authState = {
           isAuthenticated: true,
           user,
@@ -108,6 +108,7 @@ export const register = (name: string, email: string, password: string, role: Us
         id: `user_${Date.now()}`,
         name,
         email,
+        password, // Store the password (in a real app, this would be hashed)
         role,
         verified: true // Auto verified
       };

@@ -1,12 +1,12 @@
-
 export type UserRole = "individual" | "corporate" | "admin";
 
 export interface User {
   id: string;
   name: string;
   email: string;
+  password?: string; // Added password field
   role: UserRole;
-  verified?: boolean;
+  verified: boolean;
 }
 
 export interface Product {

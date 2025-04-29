@@ -95,9 +95,7 @@ export function Login() {
         </Card>
         
         <div className="mt-8 text-center text-sm text-gray-500">
-          <p>For demo, use these credentials:</p>
-          <p>User: n72@gmail.com, Password: 12345678N</p>
-          <p>Admin: admin@gmail.com, Password: 12345678N</p>
+          <p>Register a new account and use those credentials to log in.</p>
         </div>
       </div>
     </div>
