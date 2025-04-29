@@ -1,9 +1,28 @@
 
 import { User, UserRole } from "@/types";
-import { users } from "@/data/mockData";
 import { toast } from "@/components/ui/use-toast";
 
 const LOCAL_STORAGE_AUTH_KEY = "subscribepro_auth";
+const LOCAL_STORAGE_USERS_KEY = "subscribepro_users";
+
+// Initialize users from localStorage or create empty array
+const getUsers = (): User[] => {
+  const storedUsers = localStorage.getItem(LOCAL_STORAGE_USERS_KEY);
+  if (storedUsers) {
+    try {
+      return JSON.parse(storedUsers);
+    } catch (e) {
+      console.error("Error parsing users from localStorage:", e);
+      return [];
+    }
+  }
+  return [];
+};
+
+// Save users to localStorage
+const saveUsers = (users: User[]) => {
+  localStorage.setItem(LOCAL_STORAGE_USERS_KEY, JSON.stringify(users));
+};
 
 export const getAuthState = () => {
   // Get auth state from localStorage
@@ -27,11 +46,14 @@ export const getAuthState = () => {
 
 export const login = (email: string, password: string): Promise<User> => {
   return new Promise((resolve, reject) => {
+    // Get users from localStorage
+    const users = getUsers();
+    
     // Simulate API call
     setTimeout(() => {
       const user = users.find(u => u.email === email);
       
-      // For demo purposes, simple password check
+      // For demo purposes, simple password check (in real app, would use hashed passwords)
       if (user && password === "12345678N") {
         const authState = {
           isAuthenticated: true,
@@ -63,6 +85,9 @@ export const login = (email: string, password: string): Promise<User> => {
 
 export const register = (name: string, email: string, password: string, role: UserRole): Promise<User> => {
   return new Promise((resolve, reject) => {
+    // Get current users from localStorage
+    const users = getUsers();
+    
     // Simulate API call
     setTimeout(() => {
       const existingUser = users.find(u => u.email === email);
@@ -80,14 +105,18 @@ export const register = (name: string, email: string, password: string, role: Us
       
       // Create new user
       const newUser: User = {
-        id: `user_${users.length + 1}`,
+        id: `user_${Date.now()}`,
         name,
         email,
         role,
         verified: true // Auto verified
       };
       
+      // Add to users array
       users.push(newUser);
+      
+      // Save updated users to localStorage
+      saveUsers(users);
       
       toast({
         title: "Registration successful",
@@ -114,7 +143,7 @@ export const checkIsAdmin = (): boolean => {
   return user?.role === "admin";
 };
 
-// Add the missing verifyEmail function
+// Add the verifyEmail function
 export const verifyEmail = (token: string): Promise<boolean> => {
   return new Promise((resolve, reject) => {
     // Simulate API call
