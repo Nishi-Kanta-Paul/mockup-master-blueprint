@@ -9,15 +9,19 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { products } from "@/data/mockData";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash } from "lucide-react";
+import { Plus, Pencil, Trash, Filter, Search } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { Product } from "@/types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function AdminProducts() {
   const [productList, setProductList] = useState(products);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  
   const [newProduct, setNewProduct] = useState({
     name: "",
     shortDescription: "",
@@ -26,6 +30,9 @@ export function AdminProducts() {
     regularPrice: 0,
     imageUrl: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMTc3M3wwfDF8c2VhcmNofDI3fHx0ZWNobm9sb2d5fGVufDB8fHx8MTY5OTU3Mjk3NXww&ixlib=rb-4.0.3&q=80&w=400"
   });
+  
+  // Get all unique categories from products
+  const categories = ["all", ...Array.from(new Set(productList.map(product => product.category)))];
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -86,6 +93,12 @@ export function AdminProducts() {
   };
   
   const handleDeleteProduct = (productId: string) => {
+    const productToDelete = productList.find(p => p.id === productId);
+    
+    if (!confirm(`Are you sure you want to delete "${productToDelete?.name}"?`)) {
+      return;
+    }
+    
     const updatedProducts = productList.filter(product => product.id !== productId);
     
     setProductList(updatedProducts);
@@ -99,6 +112,16 @@ export function AdminProducts() {
     setSelectedProduct(product);
     setIsEditDialogOpen(true);
   };
+  
+  // Filter products based on search and category
+  const filteredProducts = productList.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         product.description.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesCategory = categoryFilter === "all" || product.category === categoryFilter;
+    
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <AdminLayout activeTab="products">
@@ -130,7 +153,7 @@ export function AdminProducts() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="shortDescription">Short Description</Label>
+                  <Label htmlFor="shortDescription">Subcategory/Short Description</Label>
                   <Input 
                     id="shortDescription" 
                     name="shortDescription"
@@ -184,6 +207,33 @@ export function AdminProducts() {
           </Dialog>
         </div>
         
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Input
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          
+          <div className="w-full sm:w-64">
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Filter by Category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map(category => (
+                  <SelectItem key={category} value={category}>
+                    {category === "all" ? "All Categories" : category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
         {/* Edit Product Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="sm:max-w-[500px]">
@@ -205,7 +255,7 @@ export function AdminProducts() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-shortDescription">Short Description</Label>
+                  <Label htmlFor="edit-shortDescription">Subcategory/Short Description</Label>
                   <Input 
                     id="edit-shortDescription" 
                     name="shortDescription"
@@ -261,7 +311,7 @@ export function AdminProducts() {
         
         <Card>
           <CardHeader>
-            <CardTitle>Products</CardTitle>
+            <CardTitle>Products ({filteredProducts.length})</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
@@ -269,36 +319,46 @@ export function AdminProducts() {
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Category</TableHead>
+                  <TableHead>Subcategory</TableHead>
                   <TableHead className="text-right">Price</TableHead>
                   <TableHead className="w-[100px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {productList.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>{product.category}</TableCell>
-                    <TableCell className="text-right">${product.regularPrice.toFixed(2)}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => openEditDialog(product)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => handleDeleteProduct(product.id)}
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      </div>
+                {filteredProducts.length > 0 ? (
+                  filteredProducts.map((product) => (
+                    <TableRow key={product.id}>
+                      <TableCell className="font-medium">{product.name}</TableCell>
+                      <TableCell>{product.category}</TableCell>
+                      <TableCell>{product.shortDescription}</TableCell>
+                      <TableCell className="text-right">${product.regularPrice.toFixed(2)}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => openEditDialog(product)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => handleDeleteProduct(product.id)}
+                          >
+                            <Trash className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-4">
+                      No products found matching your filters
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </CardContent>

@@ -8,13 +8,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { login } from "@/lib/auth";
 import { Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [verificationNeeded, setVerificationNeeded] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,11 +34,6 @@ export function Login() {
       navigate("/dashboard");
     } catch (error: any) {
       console.error("Login error:", error);
-      
-      // Check if this is a verification error
-      if (error.message?.includes("not verified")) {
-        setVerificationNeeded(true);
-      }
     } finally {
       setLoading(false);
     }
@@ -61,14 +54,6 @@ export function Login() {
           </CardHeader>
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
-              {verificationNeeded && (
-                <Alert variant="destructive">
-                  <AlertDescription>
-                    Your email address has not been verified. Please check your email and follow the verification link before logging in.
-                  </AlertDescription>
-                </Alert>
-              )}
-              
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -111,8 +96,8 @@ export function Login() {
         
         <div className="mt-8 text-center text-sm text-gray-500">
           <p>For demo, use these credentials:</p>
-          <p>Email: admin@system.com, jane@acme.corp, or john@example.com</p>
-          <p>Password: password</p>
+          <p>User: n72@gmail.com, Password: 12345678N</p>
+          <p>Admin: admin@gmail.com, Password: 12345678N</p>
         </div>
       </div>
     </div>
