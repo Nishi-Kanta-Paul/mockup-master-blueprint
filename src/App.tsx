@@ -5,6 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AuthGuard from "./components/AuthGuard";
+import { useEffect } from "react";
+import { setupDefaultAdmin } from "./lib/auth";
 
 // Pages
 import Index from "./pages/Index";
@@ -22,109 +24,116 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          {/* Public routes */}
-          <Route 
-            path="/" 
-            element={
-              <Index />
-            } 
-          />
-          <Route 
-            path="/login" 
-            element={
-              <AuthGuard requireAuth={false}>
-                <Login />
-              </AuthGuard>
-            } 
-          />
-          <Route 
-            path="/register" 
-            element={
-              <AuthGuard requireAuth={false}>
-                <Register />
-              </AuthGuard>
-            } 
-          />
-          <Route 
-            path="/verify-email" 
-            element={
-              <VerifyEmail />
-            } 
-          />
-          
-          {/* Protected routes */}
-          <Route 
-            path="/dashboard" 
-            element={
-              <AuthGuard>
-                <Dashboard />
-              </AuthGuard>
-            } 
-          />
-          <Route 
-            path="/products" 
-            element={
-              <AuthGuard>
-                <Products />
-              </AuthGuard>
-            } 
-          />
-          <Route 
-            path="/products/:productId" 
-            element={
-              <AuthGuard>
-                <ProductDetail />
-              </AuthGuard>
-            } 
-          />
-          <Route 
-            path="/billing" 
-            element={
-              <AuthGuard>
-                <Billing />
-              </AuthGuard>
-            } 
-          />
-          
-          {/* Admin routes */}
-          <Route 
-            path="/admin" 
-            element={
-              <AuthGuard requireAuth={true} requireAdmin={true}>
-                <AdminProducts />
-              </AuthGuard>
-            } 
-          />
-          <Route 
-            path="/admin/contracts" 
-            element={
-              <AuthGuard requireAuth={true} requireAdmin={true}>
-                <AdminContracts />
-              </AuthGuard>
-            } 
-          />
-          <Route 
-            path="/admin/users" 
-            element={
-              <AuthGuard requireAuth={true} requireAdmin={true}>
-                <AdminUsers />
-              </AuthGuard>
-            } 
-          />
-          
-          {/* Catch-all route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  // Set up default admin user on mount
+  useEffect(() => {
+    setupDefaultAdmin();
+  }, []);
+  
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            {/* Public routes */}
+            <Route 
+              path="/" 
+              element={
+                <Index />
+              } 
+            />
+            <Route 
+              path="/login" 
+              element={
+                <AuthGuard requireAuth={false}>
+                  <Login />
+                </AuthGuard>
+              } 
+            />
+            <Route 
+              path="/register" 
+              element={
+                <AuthGuard requireAuth={false}>
+                  <Register />
+                </AuthGuard>
+              } 
+            />
+            <Route 
+              path="/verify-email" 
+              element={
+                <VerifyEmail />
+              } 
+            />
+            
+            {/* Protected routes */}
+            <Route 
+              path="/dashboard" 
+              element={
+                <AuthGuard>
+                  <Dashboard />
+                </AuthGuard>
+              } 
+            />
+            <Route 
+              path="/products" 
+              element={
+                <AuthGuard>
+                  <Products />
+                </AuthGuard>
+              } 
+            />
+            <Route 
+              path="/products/:productId" 
+              element={
+                <AuthGuard>
+                  <ProductDetail />
+                </AuthGuard>
+              } 
+            />
+            <Route 
+              path="/billing" 
+              element={
+                <AuthGuard>
+                  <Billing />
+                </AuthGuard>
+              } 
+            />
+            
+            {/* Admin routes */}
+            <Route 
+              path="/admin" 
+              element={
+                <AuthGuard requireAuth={true} requireAdmin={true}>
+                  <AdminProducts />
+                </AuthGuard>
+              } 
+            />
+            <Route 
+              path="/admin/contracts" 
+              element={
+                <AuthGuard requireAuth={true} requireAdmin={true}>
+                  <AdminContracts />
+                </AuthGuard>
+              } 
+            />
+            <Route 
+              path="/admin/users" 
+              element={
+                <AuthGuard requireAuth={true} requireAdmin={true}>
+                  <AdminUsers />
+                </AuthGuard>
+              } 
+            />
+            
+            {/* Catch-all route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
