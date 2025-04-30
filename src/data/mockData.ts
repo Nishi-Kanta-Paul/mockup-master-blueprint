@@ -1,4 +1,3 @@
-
 import { Contract, ContractPrice, Invoice, Product, Subscription, User } from "@/types";
 
 export const products: Product[] = [
@@ -45,19 +44,22 @@ export const users: User[] = [
     id: "user_1",
     name: "John Doe",
     email: "john@example.com",
-    role: "individual"
+    role: "individual",
+    verified: true
   },
   {
     id: "user_2",
     name: "Jane Smith",
     email: "jane@acme.corp",
-    role: "corporate"
+    role: "corporate",
+    verified: true
   },
   {
     id: "user_3",
     name: "Admin User",
     email: "admin@system.com",
-    role: "admin"
+    role: "admin",
+    verified: true
   }
 ];
 

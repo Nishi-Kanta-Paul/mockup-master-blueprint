@@ -1,10 +1,11 @@
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { logout } from "@/lib/auth";
+import { logout, getAuthState } from "@/lib/auth";
 import { Box, FileText, Package, Users } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -13,6 +14,30 @@ interface AdminLayoutProps {
 
 export function AdminLayout({ children, activeTab }: AdminLayoutProps) {
   const navigate = useNavigate();
+  const [userStats, setUserStats] = useState({
+    total: 0,
+    individual: 0,
+    corporate: 0,
+    admin: 0
+  });
+  
+  // Fetch user stats from localStorage on component mount
+  useEffect(() => {
+    const storedUsers = localStorage.getItem("subscribepro_users");
+    if (storedUsers) {
+      try {
+        const users = JSON.parse(storedUsers);
+        setUserStats({
+          total: users.length,
+          individual: users.filter((u: any) => u.role === "individual").length,
+          corporate: users.filter((u: any) => u.role === "corporate").length,
+          admin: users.filter((u: any) => u.role === "admin").length
+        });
+      } catch (error) {
+        console.error('Error parsing users from localStorage:', error);
+      }
+    }
+  }, []);
   
   const handleTabChange = (value: string) => {
     switch (value) {
@@ -60,6 +85,42 @@ export function AdminLayout({ children, activeTab }: AdminLayoutProps) {
               </TabsTrigger>
             </TabsList>
           </Tabs>
+          
+          {/* Admin Stats Cards */}
+          <div className="grid grid-cols-4 gap-4 mt-6">
+            <Card>
+              <CardHeader className="py-2">
+                <CardTitle className="text-md text-center">Total Users</CardTitle>
+              </CardHeader>
+              <CardContent className="py-2">
+                <p className="text-2xl font-bold text-center">{userStats.total}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="py-2">
+                <CardTitle className="text-md text-center">Individual</CardTitle>
+              </CardHeader>
+              <CardContent className="py-2">
+                <p className="text-2xl font-bold text-center">{userStats.individual}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="py-2">
+                <CardTitle className="text-md text-center">Corporate</CardTitle>
+              </CardHeader>
+              <CardContent className="py-2">
+                <p className="text-2xl font-bold text-center">{userStats.corporate}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="py-2">
+                <CardTitle className="text-md text-center">Admins</CardTitle>
+              </CardHeader>
+              <CardContent className="py-2">
+                <p className="text-2xl font-bold text-center">{userStats.admin}</p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </header>
       

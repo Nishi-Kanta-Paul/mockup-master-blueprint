@@ -1,21 +1,23 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { products } from "@/data/mockData";
+import { products as initialProducts } from "@/data/mockData";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash, Filter, Search } from "lucide-react";
+import { Plus, Pencil, Trash, Search } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { Product } from "@/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+const STORAGE_KEY = "subscribepro_products";
+
 export function AdminProducts() {
-  const [productList, setProductList] = useState(products);
+  const [productList, setProductList] = useState<Product[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -30,6 +32,28 @@ export function AdminProducts() {
     regularPrice: 0,
     imageUrl: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMTc3M3wwfDF8c2VhcmNofDI3fHx0ZWNobm9sb2d5fGVufDB8fHx8MTY5OTU3Mjk3NXww&ixlib=rb-4.0.3&q=80&w=400"
   });
+
+  // Load products from localStorage on component mount
+  useEffect(() => {
+    const storedProducts = localStorage.getItem(STORAGE_KEY);
+    if (storedProducts) {
+      try {
+        setProductList(JSON.parse(storedProducts));
+      } catch (error) {
+        console.error('Error parsing products from localStorage:', error);
+        setProductList(initialProducts);
+        saveProductsToLocalStorage(initialProducts);
+      }
+    } else {
+      setProductList(initialProducts);
+      saveProductsToLocalStorage(initialProducts);
+    }
+  }, []);
+
+  // Save products to localStorage
+  const saveProductsToLocalStorage = (products: Product[]) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+  };
   
   // Get all unique categories from products
   const categories = ["all", ...Array.from(new Set(productList.map(product => product.category)))];
@@ -51,13 +75,16 @@ export function AdminProducts() {
   };
   
   const handleAddProduct = () => {
-    const newId = `prod_${productList.length + 1}`;
+    const newId = `prod_${Date.now()}`;
     const productToAdd = {
       ...newProduct,
       id: newId
     };
     
-    setProductList([...productList, productToAdd]);
+    const updatedProducts = [...productList, productToAdd];
+    setProductList(updatedProducts);
+    saveProductsToLocalStorage(updatedProducts);
+    
     setIsAddDialogOpen(false);
     toast({
       title: "Product Added",
@@ -83,6 +110,8 @@ export function AdminProducts() {
     );
     
     setProductList(updatedProducts);
+    saveProductsToLocalStorage(updatedProducts);
+    
     setIsEditDialogOpen(false);
     toast({
       title: "Product Updated",
@@ -102,6 +131,8 @@ export function AdminProducts() {
     const updatedProducts = productList.filter(product => product.id !== productId);
     
     setProductList(updatedProducts);
+    saveProductsToLocalStorage(updatedProducts);
+    
     toast({
       title: "Product Deleted",
       description: "The product has been deleted successfully."
