@@ -29,8 +29,8 @@ export function AuthGuard({
       return;
     }
     
-    // If admin access is required but user isn't an admin, redirect to dashboard
-    if (requireAdmin && (!isAuthenticated || user?.role !== "admin")) {
+    // If admin access is required but user isn't an admin or corporate, redirect to dashboard
+    if (requireAdmin && (!isAuthenticated || (user?.role !== "admin" && user?.role !== "corporate"))) {
       navigate("/dashboard");
       return;
     }
@@ -55,8 +55,8 @@ export function AuthGuard({
     return null;
   }
   
-  // If admin access is required and user is not admin, don't render children
-  if (requireAdmin && (!isAuthenticated || user?.role !== "admin")) {
+  // If admin access is required and user is not admin or corporate, don't render children
+  if (requireAdmin && (!isAuthenticated || (user?.role !== "admin" && user?.role !== "corporate"))) {
     return null;
   }
   

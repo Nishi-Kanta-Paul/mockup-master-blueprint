@@ -14,6 +14,7 @@ interface AdminLayoutProps {
 
 export function AdminLayout({ children, activeTab }: AdminLayoutProps) {
   const navigate = useNavigate();
+  const { user } = getAuthState();
   const [userStats, setUserStats] = useState({
     total: 0,
     individual: 0,
@@ -52,6 +53,13 @@ export function AdminLayout({ children, activeTab }: AdminLayoutProps) {
         break;
     }
   };
+  
+  // Redirect to dashboard if user is not admin or corporate
+  useEffect(() => {
+    if (user && user.role !== "admin" && user.role !== "corporate") {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -138,3 +146,4 @@ export function AdminLayout({ children, activeTab }: AdminLayoutProps) {
     </div>
   );
 }
+

@@ -21,7 +21,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { user } = getAuthState();
-  const isAdmin = checkIsAdmin();
+  const isAdmin = user?.role === "admin" || user?.role === "corporate";
 
   const handleLogout = () => {
     logout();
@@ -84,6 +84,12 @@ export function MainLayout({ children }: MainLayoutProps) {
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
                 </DropdownMenuItem>
+                {isAdmin && (
+                  <DropdownMenuItem onClick={() => navigate("/admin")}>
+                    <Users className="mr-2 h-4 w-4" />
+                    <span>Admin Panel</span>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
